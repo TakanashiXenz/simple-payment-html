@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metode Pembayaran</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .payment-card, .faq-item {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .payment-card:hover, .faq-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .clickable-qris:hover {
+             cursor: pointer;
+        }
+        .copy-button:active, .modal-close-button:active, .download-button:active {
+            transform: scale(0.95);
+        }
+        .copied-toast {
+            animation: fadeInOut 2s ease-in-out;
+        }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translateY(20px); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+        }
+        .status-aktif {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        .status-tidak-ada {
+            background-color: rgba(100, 116, 139, 0.2);
+            color: #64748b;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #1e293b; 
+            padding: 2rem; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .faq-item summary {
+            cursor: pointer;
+            outline: none;
+        }
+        .faq-item summary::-webkit-details-marker {
+            display: none;
+        }
+        .faq-item summary::after {
+            content: '+';
+            float: right;
+            font-size: 1.5em;
+            line-height: 1;
+            transition: transform 0.2s ease-in-out;
+        }
+        .faq-item[open] summary::after {
+            transform: rotate(45deg);
+        }
+        .qris-image {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 1rem auto 0;
+            border-radius: 0.5rem;
+            border: 2px solid #334155;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 to-slate-800 text-white min-h-screen flex flex-col items-center p-4 sm:p-6">
+
+    <div id="copied-toast" class="copied-toast fixed top-5 right-5 bg-green-500 text-white py-2 px-4 rounded-lg shadow-md hidden z-[60]">
+        Pesan notifikasi!
+    </div>
+
+    <div class="w-full max-w-2xl bg-slate-800/50 backdrop-blur-md shadow-2xl rounded-xl p-6 sm:p-10 my-8">
+        <header class="text-center mb-8 sm:mb-10">
+            <h1 class="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">Metode Pembayaran</h1>
+            <p class="text-slate-400 mt-2 text-sm sm:text-base">Silakan pilih salah satu metode pembayaran di bawah ini.</p>
+        </header>
+
+        <div class="space-y-6">
+            <!-- Dana -->
+            <div class="payment-card bg-slate-700/70 p-5 sm:p-6 rounded-lg shadow-lg">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    <div>
+                        <div class="flex items-center gap-x-2">
+                           <h2 class="text-xl sm:text-2xl font-semibold text-sky-400">Dana</h2>
+                           <span class="status-badge status-aktif">Aktif</span>
+                        </div>
+                        <p id="dana-number" class="text-slate-300 text-lg sm:text-xl mt-1">0895324070395</p>
+                    </div>
+                    <button onclick="copyToClipboard('dana-number', 'Dana')" class="copy-button mt-3 sm:mt-0 bg-sky-500 hover:bg-sky-600 text-white font-medium py-2 px-4 rounded-lg text-sm flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard mr-2" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+                        Salin
+                    </button>
+                </div>
+            </div>
+
+            <!-- Gopay -->
+            <div class="payment-card bg-slate-700/70 p-5 sm:p-6 rounded-lg shadow-lg">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    <div>
+                        <div class="flex items-center gap-x-2">
+                            <h2 class="text-xl sm:text-2xl font-semibold text-emerald-400">Gopay</h2>
+                            <span class="status-badge status-aktif">Aktif</span>
+                        </div>
+                        <p id="gopay-number" class="text-slate-300 text-lg sm:text-xl mt-1">0895324070395</p>
+                    </div>
+                    <button onclick="copyToClipboard('gopay-number', 'Gopay')" class="copy-button mt-3 sm:mt-0 bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg text-sm flex items-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard mr-2" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+                        Salin
+                    </button>
+                </div>
+            </div>
+
+            <!-- OVO -->
+            <div class="payment-card bg-slate-700/70 p-5 sm:p-6 rounded-lg shadow-lg">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                    <div>
+                        <div class="flex items-center gap-x-2">
+                            <h2 class="text-xl sm:text-2xl font-semibold text-purple-400">OVO</h2>
+                            <span class="status-badge status-aktif">Aktif</span>
+                        </div>
+                        <p id="ovo-number" class="text-slate-300 text-lg sm:text-xl mt-1">0895324070395</p>
+                    </div>
+                    <button onclick="copyToClipboard('ovo-number', 'OVO')" class="copy-button mt-3 sm:mt-0 bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-lg text-sm flex items-center">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard mr-2" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+                        Salin
+                    </button>
+                </div>
+            </div>
+
+            <!-- QRIS -->
+            <div id="qris-card" class="payment-card clickable-qris bg-slate-700/70 p-5 sm:p-6 rounded-lg shadow-lg text-center">
+                <div class="flex flex-col items-center">
+                    <div class="flex items-center gap-x-2 mb-3">
+                        <h2 class="text-xl sm:text-2xl font-semibold text-lime-400">QRIS</h2>
+                        <span class="status-badge status-aktif">Aktif</span>
+                    </div>
+                    <img id="qris-image-display" src="https://files.catbox.moe/jcp8hv.jpg" alt="[Image of Kode QRIS Pembayaran]" class="qris-image" onerror="this.onerror=null;this.src='https://placehold.co/200x200/1e293b/e0e0e0?text=QRIS+Tidak+Tersedia'; this.alt='[Image of Gagal memuat QRIS]';">
+                    <p class="text-slate-400 text-sm mt-2 mb-3">Klik pada area ini atau tombol di bawah untuk mengunduh kode QRIS.</p>
+                    <button onclick="event.stopPropagation(); downloadQris()" class="download-button bg-lime-500 hover:bg-lime-600 text-white font-medium py-2 px-4 rounded-lg text-sm flex items-center self-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download mr-2" viewBox="0 0 16 16">
+                          <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                          <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                        </svg>
+                        Unduh QRIS
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bank -->
+            <div class="payment-card bg-slate-700/70 p-5 sm:p-6 rounded-lg shadow-lg">
+                 <div class="flex items-center justify-between">
+                    <h2 class="text-xl sm:text-2xl font-semibold text-slate-500">Bank</h2>
+                    <span class="status-badge status-tidak-ada">Tidak Ada</span>
+                </div>
+                <p class="text-slate-400 text-lg sm:text-xl mt-1">Saat ini tidak tersedia</p>
+            </div>
+        </div>
+
+        <section class="mt-12 sm:mt-16">
+            <h2 class="text-2xl sm:text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300 mb-6 sm:mb-8">Pertanyaan Umum (FAQ)</h2>
+            <div class="space-y-4">
+                <details class="faq-item bg-slate-700/70 p-4 sm:p-5 rounded-lg shadow-lg">
+                    <summary class="text-lg font-medium text-slate-200 flex justify-between items-center">
+                        Bagaimana cara melakukan pembayaran?
+                    </summary>
+                    <p class="text-slate-300 mt-3 text-sm sm:text-base">
+                        Untuk Dana, Gopay, dan OVO, salin nomor rekening/telepon yang tertera. Lakukan transfer sejumlah tagihan Anda. Untuk QRIS, unduh gambarnya lalu scan menggunakan aplikasi e-wallet atau mobile banking Anda. Setelah itu, mohon kirimkan bukti transfer Anda.
+                    </p>
+                </details>
+                <details class="faq-item bg-slate-700/70 p-4 sm:p-5 rounded-lg shadow-lg">
+                    <summary class="text-lg font-medium text-slate-200 flex justify-between items-center">
+                        Ke mana saya harus mengirim bukti pembayaran?
+                    </summary>
+                    <p class="text-slate-300 mt-3 text-sm sm:text-base">
+                        Silakan kirim bukti pembayaran Anda ke WhatsApp 081297662535.
+                    </p>
+                </details>
+                <details class="faq-item bg-slate-700/70 p-4 sm:p-5 rounded-lg shadow-lg">
+                    <summary class="text-lg font-medium text-slate-200 flex justify-between items-center">
+                        Berapa lama proses konfirmasi pembayaran?
+                    </summary>
+                    <p class="text-slate-300 mt-3 text-sm sm:text-base">
+                        Konfirmasi pembayaran biasanya diproses dalam 1x24 jam setelah bukti transfer diterima. Jika lebih dari itu, silakan hubungi kami.
+                    </p>
+                </details>
+                 <details class="faq-item bg-slate-700/70 p-4 sm:p-5 rounded-lg shadow-lg">
+                    <summary class="text-lg font-medium text-slate-200 flex justify-between items-center">
+                        Apakah ada biaya tambahan?
+                    </summary>
+                    <p class="text-slate-300 mt-3 text-sm sm:text-base">
+                        Tidak ada biaya tambahan dari pihak kami. Namun, mungkin ada biaya transfer antar bank atau dari penyedia layanan e-wallet Anda.
+                    </p>
+                </details>
+            </div>
+        </section>
+
+        <footer class="text-center mt-10 sm:mt-12 text-slate-500 text-xs sm:text-sm">
+            <p>&copy; <span id="currentYear"></span> XenzMarket. Hak Cipta Dilindungi.</p>
+        </footer>
+    </div>
+
+    <div id="paymentProofModal" class="modal-overlay">
+        <div class="modal-content text-center">
+            <h3 class="text-xl sm:text-2xl font-semibold text-sky-400 mb-4">Konfirmasi Pembayaran</h3>
+            <p class="text-slate-300 mb-6 text-sm sm:text-base">
+                Nomor pembayaran telah disalin. Setelah melakukan transfer, mohon segera kirimkan bukti pembayaran Anda ke:
+            </p>
+            <p class="text-lg font-semibold text-amber-400 mb-6">WhatsApp 081297662535</p>
+            <button id="closeModalButton" class="modal-close-button bg-rose-500 hover:bg-rose-600 text-white font-medium py-2 px-6 rounded-lg text-sm">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        const paymentProofModal = document.getElementById('paymentProofModal');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const qrisCard = document.getElementById('qris-card');
+        const qrisImageUrl = 'https://files.catbox.moe/jcp8hv.jpg';
+
+        function copyToClipboard(elementId, paymentMethodName) {
+            const textToCopy = document.getElementById(elementId).innerText;
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast(paymentMethodName + " nomor berhasil disalin!");
+                setTimeout(openModal, 500); 
+            } catch (err) {
+                console.error('Gagal menyalin teks: ', err);
+                showToast("Gagal menyalin nomor.", true);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function downloadQris() {
+            fetch(qrisImageUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'QRIS_Pembayaran.jpg'; 
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href); 
+                    showToast("QRIS berhasil diunduh!");
+                })
+                .catch(err => {
+                    console.error('Gagal mengunduh QRIS:', err);
+                    showToast("Gagal mengunduh QRIS.", true);
+                });
+        }
+
+        if (qrisCard) {
+            qrisCard.addEventListener('click', function(event) {
+                if (event.target.tagName !== 'BUTTON' && !event.target.closest('button')) {
+                     downloadQris();
+                }
+            });
+        }
+        
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('copied-toast');
+            toast.innerText = message;
+            toast.classList.remove('hidden');
+            if(isError) {
+                toast.classList.remove('bg-green-500');
+                toast.classList.add('bg-red-500');
+            } else {
+                toast.classList.remove('bg-red-500');
+                toast.classList.add('bg-green-500');
+            }
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 2500);
+        }
+
+        function openModal() {
+            if (paymentProofModal) {
+                paymentProofModal.classList.add('active');
+            }
+        }
+
+        function closeModal() {
+            if (paymentProofModal) {
+                paymentProofModal.classList.remove('active');
+            }
+        }
+
+        if (closeModalButton) {
+            closeModalButton.addEventListener('click', closeModal);
+        }
+
+        if (paymentProofModal) {
+            paymentProofModal.addEventListener('click', function(event) {
+                if (event.target === paymentProofModal) {
+                    closeModal();
+                }
+            });
+        }
+        
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        const detailsElements = document.querySelectorAll('.faq-item');
+        detailsElements.forEach(details => {
+            details.addEventListener('toggle', function() {
+                if (this.open) {
+                    detailsElements.forEach(otherDetails => {
+                        if (otherDetails !== this && otherDetails.open) {
+                            otherDetails.open = false;
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
